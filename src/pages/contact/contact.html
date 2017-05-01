@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Customers</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <button ion-button>Add</button>
+  <ion-item-group>
+    <ion-item>
+      <ion-row>
+        <ion-col>
+          <strong>Policy No.</strong>
+        </ion-col>
+        <ion-col>
+          <strong>Policy Owner</strong>
+        </ion-col>
+        <ion-col>
+          <strong>Customer</strong>
+        </ion-col>
+      </ion-row>
+
+    </ion-item>
+    <ion-item>
+      <ion-row (click)="presentActionSheet();"><ion-col>3444</ion-col><ion-col>John Smith</ion-col><ion-col>28 Mar 2017</ion-col></ion-row>
+    </ion-item>
+    <ion-item>
+      <ion-row (click)="presentActionSheet();"><ion-col>5434</ion-col><ion-col>Junaid</ion-col><ion-col>28 Mar 2017</ion-col></ion-row>
+    </ion-item>
+  </ion-item-group>
+
+</ion-content>
