@@ -3,41 +3,60 @@ import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
 
-import { AboutPage } from '../pages/about/about';
-import { ContactPage } from '../pages/contact/contact';
-import { HomePage } from '../pages/home/home';
+import { CcExpirePage } from '../pages/ccexpire/ccexpire';
+import { CustomersPage } from '../pages/customers/customers';
+import { DashboardPage } from '../pages/dashboard/dashboard';
 import { SettingPage } from '../pages/setting/setting';
 import { TabsPage } from '../pages/tabs/tabs';
+import { LoginPage } from '../pages/login/login';
+import { AddCustomerPage } from '../pages/addcustomer/addcustomer';
+
+import { CustomerService } from '../services/customer.service'
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
+import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
+import { IonicStorageModule } from '@ionic/storage';
+
+const cloudSettings: CloudSettings = {
+  'core': {
+    'app_id': '54074253'
+  }
+};
 
 @NgModule({
   declarations: [
     MyApp,
-    AboutPage,
-    ContactPage,
-    HomePage,
+    CcExpirePage,
+    CustomersPage,
+    DashboardPage,
     SettingPage,
-    TabsPage
+    TabsPage,
+    LoginPage,
+    AddCustomerPage
   ],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    CloudModule.forRoot(cloudSettings),
+    IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    AboutPage,
-    ContactPage,
-    HomePage,
+    CcExpirePage,
+    CustomersPage,
+    DashboardPage,
     SettingPage,
-    TabsPage
+    TabsPage,
+    LoginPage,
+    AddCustomerPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    CustomerService
   ]
 })
 export class AppModule {}

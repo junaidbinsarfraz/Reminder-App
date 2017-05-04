@@ -1,0 +1,93 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Dashboard</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-item-group>
+    <ion-item-divider color="light" *ngIf="customersDueDayOne.length > 0">
+      <h2>Due in 1 day</h2>
+    </ion-item-divider>
+    <ion-item *ngIf="customersDueDayOne.length > 0">
+      <ion-row>
+        <ion-col>
+          <strong>Policy No.</strong>
+        </ion-col>
+        <ion-col>
+          <strong>Policy Owner</strong>
+        </ion-col>
+        <ion-col>
+          <strong>Due Date</strong>
+        </ion-col>
+      </ion-row>
+
+    </ion-item>
+    <ion-item *ngFor="let selectedCustomer of customersDueDayOne">
+      <ion-row (click)="showConfirm(selectedCustomer);">
+        <ion-col>{{ selectedCustomer.policyNo }}</ion-col>
+        <ion-col>{{ selectedCustomer.policyOwner }}</ion-col>
+        <ion-col>{{ selectedCustomer.dueDate }}</ion-col>
+      </ion-row>
+    </ion-item>
+  </ion-item-group>
+
+  <ion-item-group>
+    <ion-item-divider color="light" *ngIf="customersDueDayThree.length > 0">
+      <h2>Due in 3 days</h2>
+    </ion-item-divider>
+    <ion-item *ngIf="customersDueDayThree.length > 0">
+      <ion-row>
+        <ion-col>
+          <strong>Policy No.</strong>
+        </ion-col>
+        <ion-col>
+          <strong>Policy Owner</strong>
+        </ion-col>
+        <ion-col>
+          <strong>Due Date</strong>
+        </ion-col>
+      </ion-row>
+
+    </ion-item>
+    <ion-item *ngFor="let selectedCustomer of customersDueDayThree">
+      <ion-row (click)="showConfirm(selectedCustomer);">
+        <ion-col>{{ selectedCustomer.policyNo }}</ion-col>
+        <ion-col>{{ selectedCustomer.policyOwner }}</ion-col>
+        <ion-col>{{ selectedCustomer.dueDate }}</ion-col>
+      </ion-row>
+    </ion-item>
+  </ion-item-group>
+
+  <ion-item-group>
+    <ion-item-divider color="light" *ngIf="customersDueDaySeven.length > 0">
+      <h2>Due in 7 days</h2>
+    </ion-item-divider>
+    <ion-item *ngIf="customersDueDaySeven.length > 0">
+      <ion-row>
+        <ion-col>
+          <strong>Policy No.</strong>
+        </ion-col>
+        <ion-col>
+          <strong>Policy Owner</strong>
+        </ion-col>
+        <ion-col>
+          <strong>Due Date</strong>
+        </ion-col>
+      </ion-row>
+
+    </ion-item>
+    <ion-item *ngFor="let selectedCustomer of customersDueDaySeven">
+      <ion-row (click)="showConfirm(selectedCustomer);">
+        <ion-col>{{ selectedCustomer.policyNo }}</ion-col>
+        <ion-col>{{ selectedCustomer.policyOwner }}</ion-col>
+        <ion-col>{{ selectedCustomer.dueDate }}</ion-col>
+      </ion-row>
+    </ion-item>
+    <ion-item *ngIf="customersDueDayOne == 0 &amp;&amp; customersDueDayThree == 0 &amp;&amp; customersDueDaySeven == 0">
+      No Record Found
+    </ion-item>
+  </ion-item-group>
+
+</ion-content>

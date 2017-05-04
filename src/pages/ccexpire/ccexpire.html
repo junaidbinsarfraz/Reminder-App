@@ -1,0 +1,40 @@
+
+<ion-header>
+  <ion-navbar>
+    <ion-title>CC Expire</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  
+  <ion-item-group>
+    <ion-item-divider color="light" *ngIf="customersCcExpired.length > 0">
+      <h2>Due in 1 Month</h2>
+    </ion-item-divider>
+    <ion-item *ngIf="customersCcExpired.length > 0">
+      <ion-row>
+        <ion-col>
+          <strong>Policy No.</strong>
+        </ion-col>
+        <ion-col>
+          <strong>Policy Owner</strong>
+        </ion-col>
+        <ion-col>
+          <strong>Due Date</strong>
+        </ion-col>
+      </ion-row>
+
+    </ion-item>
+    <ion-item *ngFor="let selectedCustomer of customersCcExpired">
+      <ion-row (click)="showConfirm(selectedCustomer);">
+        <ion-col>{{ selectedCustomer.policyNo }}</ion-col>
+        <ion-col>{{ selectedCustomer.policyOwner }}</ion-col>
+        <ion-col>{{ selectedCustomer.ccExpire }}</ion-col>
+      </ion-row>
+    </ion-item>
+    <ion-item *ngIf="customersCcExpired == 0">
+      No Record Found
+    </ion-item>
+  </ion-item-group>
+
+</ion-content>
