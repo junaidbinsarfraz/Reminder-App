@@ -12,6 +12,9 @@
       Add
       </button>
     </ion-item>
+    <ion-item no-lines>
+      <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="onInput($event)" (ionCancel)="onCancel($event)" [showCancelButton]="shouldShowCancel"></ion-searchbar>
+    </ion-item>
     <ion-item *ngIf="customers.length == 0">
       No Record Found
     </ion-item>

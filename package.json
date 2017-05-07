@@ -45,5 +45,9 @@
     "ionic-plugin-keyboard"
   ],
   "cordovaPlatforms": [],
-  "description": "simple-login: An Ionic project"
+  "description": "simple-login: An Ionic project",
+  "config": {
+    "ionic_bundler": "webpack",
+    "ionic_source_map_type": "#inline-source-map"
+  }
 }

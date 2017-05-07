@@ -17,8 +17,6 @@ export class DashboardPage {
 
   constructor(public navCtrl: NavController, public alertCtrl: AlertController, public events: Events, public storage: Storage) {
 
-    this.updateLists();
-
     this.events.subscribe('customerListUpdated', () => {
       this.updateLists();
       console.log("CcExpirePage");
@@ -26,12 +24,23 @@ export class DashboardPage {
 
   }
 
+  ionViewWillEnter() {
+
+    this.updateLists();
+
+  }
+
   updateLists() {
     this.customersDueDayOne = [];
     this.customersDueDayThree = [];
     this.customersDueDaySeven = [];
-    
+
     this.storage.get('customers').then((val) => {
+
+      this.customersDueDayOne = [];
+      this.customersDueDayThree = [];
+      this.customersDueDaySeven = [];
+
       if (val) {
 
         val.forEach(customer => {
@@ -56,11 +65,6 @@ export class DashboardPage {
           }
 
         });
-
-      } else {
-        this.customersDueDayOne = [];
-        this.customersDueDayThree = [];
-        this.customersDueDaySeven = [];
       }
 
       this.storage.set("dashboardEventCount", this.customersDueDayOne.length + this.customersDueDayThree.length + this.customersDueDaySeven.length).then(() => {

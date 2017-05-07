@@ -22,6 +22,10 @@ export class TabsPage {
 
   constructor(public events: Events, public storage: Storage) {
 
+  }
+
+  ionViewWillEnter() {
+
     if (this.dashboardEventCount == 0) {
       this.dashboardEventCount = null;
     }

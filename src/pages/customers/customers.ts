@@ -14,20 +14,10 @@ import { Customer } from '../../models/customer';
 export class CustomersPage {
 
   public customers: Customer[] = [];
+  public searchQuery: string = '';
 
   constructor(public navCtrl: NavController, public actionSheetCtrl: ActionSheetController, public events: Events, public storage: Storage) {
-    // this.customers = [
-    //   new Customer("PolicyNumber", "Owner", "insured", "Monthly", "11/11/2017", "Direct Pay", "premium"),
-    //   new Customer("PolicyNumber", "Owner", "insured", "Monthly", "01/01/2017", "Direct Pay", "premium"),
-    //   new Customer("PolicyNumber", "Owner", "insured", "Monthly", "01/02/2017", "Direct Pay", "premium")
-    // ];
-
-    storage.get('customers').then((val) => {
-      if (val) {
-        this.customers = val;
-      }
-    })
-
+    
     this.events.subscribe('customerSaved', (data) => {
       // Extract customer
       if (!data.isEditing) {
@@ -44,6 +34,59 @@ export class CustomersPage {
         this.events.publish('customerListUpdated');
       });
     });
+
+  }
+
+  ionViewWillEnter() {
+
+    this.storage.get('customers').then((val) => {
+      if (val) {
+        this.customers = val;
+      }
+    });
+
+  }
+
+  onCancel(event) {
+    // Reset items back to all of the items
+    this.storage.get('customers').then((val) => {
+      if (val) {
+        this.customers = val;
+        const copy = { ...this.customers };
+      }
+    });
+  }
+
+  onInput(searchbar) {
+    // Reset items back to all of the items
+    this.storage.get('customers').then((val) => {
+      if (val) {
+        this.customers = val;
+
+        // set q to the value of the searchbar
+        // var q = searchbar.target.value;
+        // if the value is an empty string don't filter the items
+        if (!this.searchQuery || this.searchQuery.trim() == '') {
+          this.storage.get('customers').then((val) => {
+            if (val) {
+              this.customers = val;
+            }
+          });
+          return;
+        }
+
+        this.customers = this.customers.filter((v) => {
+
+          if (v.policyNo.toLowerCase().indexOf(this.searchQuery.toLowerCase()) > -1 || v.policyOwner.toLowerCase().indexOf(this.searchQuery.toLowerCase()) > -1
+            || v.dueDate.toLowerCase().indexOf(this.searchQuery.toLowerCase()) > -1) {
+            return true;
+          }
+
+          return false;
+        })
+      }
+    });
+
   }
 
   presentActionSheet(selectedCustomer: Customer) {
@@ -54,6 +97,7 @@ export class CustomersPage {
           text: 'Edit',
           role: 'navigation',
           handler: () => {
+            this.searchQuery = '';
             this.navCtrl.push(AddCustomerPage, {
               isEditing: true,
               customer: selectedCustomer
@@ -63,7 +107,7 @@ export class CustomersPage {
           text: 'Delete',
           role: 'destructive',
           handler: () => {
-            console.log('Destructive clicked');
+            this.searchQuery = '';
             let index: number = this.customers.indexOf(selectedCustomer);
             if (index !== -1) {
               this.customers.splice(index, 1);

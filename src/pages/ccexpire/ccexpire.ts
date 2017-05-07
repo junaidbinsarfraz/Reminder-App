@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Injectable } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { AlertController, Events } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
@@ -9,13 +9,13 @@ import { Customer } from '../../models/customer';
   selector: 'page-about',
   templateUrl: 'ccexpire.html'
 })
+
+// @Injectable()
 export class CcExpirePage {
 
   public customersCcExpired: Customer[] = [];
 
   constructor(public navCtrl: NavController, public alertCtrl: AlertController, public events: Events, public storage: Storage) {
-
-    this.updateLists();
 
     this.events.subscribe('customerListUpdated', () => {
       this.updateLists();
@@ -24,9 +24,17 @@ export class CcExpirePage {
 
   }
 
+  ionViewWillEnter() {
+
+    this.updateLists();
+
+  }
+
   updateLists() {
     this.storage.get('customers').then((val) => {
-        this.customersCcExpired = [];
+
+      this.customersCcExpired = [];
+
       if (val) {
 
         val.forEach(customer => {
@@ -39,7 +47,7 @@ export class CcExpirePage {
             const [month, year] = customer.ccExpire.split('/');
 
             // var dummyDate = new Date("1/" + customer.ccExpire);
-            var ccExpireDateLastDay = new Date(year, month - 1, 0);
+            var ccExpireDateLastDay = new Date(year, month, 0);
 
             var diffDays = Math.round(Math.abs((ccExpireDateLastDay.getTime() - new Date().getTime()) / (oneDay)));
 

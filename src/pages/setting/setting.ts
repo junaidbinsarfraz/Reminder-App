@@ -11,4 +11,8 @@ export class SettingPage {
 
   }
 
+  ionViewWillEnter() {
+
+  }
+
 }

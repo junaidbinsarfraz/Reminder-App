@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { NavController, AlertController, LoadingController, NavParams, Events } from 'ionic-angular';
+import { NavController, AlertController, NavParams, Events } from 'ionic-angular';
 
 import { Customer } from '../../models/customer';
+
+import LoaderUtil from '../../utils/loader.util';
 
 @Component({
     selector: 'page-addcustomer',
@@ -15,24 +17,29 @@ export class AddCustomerPage {
     public ccExpireDate: string = new Date().toISOString();
 
     constructor(public navCtrl: NavController, public params: NavParams, public events: Events, public alertCtrl: AlertController) {
-        this.isEditing = params.get("isEditing");
-        this.customer = params.get("customer");
+    }
+
+    ionViewWillEnter() {
+        this.isEditing = this.params.get("isEditing");
+        this.customer = this.params.get("customer");
         if (this.isEditing) {
-            this.dueDate = new Date(this.customer.dueDate).toISOString();
+            
+            const [dueDateMonth, dueDateDay, dueDateYear] = this.customer.dueDate.split('/');
+            this.dueDate = new Date(Number(dueDateYear), Number(dueDateMonth) - 1, Number(dueDateDay) + 1).toISOString();
+            
             if (this.customer.methodOfPayment == "Debit/ Credit Card") {
+
                 const [month, year] = this.customer.ccExpire.split('/');
-                console.log(this.customer.ccExpire);
-                console.log([month, year]);
-                
+
                 var ccExpireDateLastDay = new Date(Number(year), Number(month), 0);
-                console.log(ccExpireDateLastDay);
+
                 this.ccExpireDate = (ccExpireDateLastDay).toISOString();
             }
         }
     }
 
     doSave() {
-
+        // LoaderUtil.showDefaultLoader();
         // TODO: Validate
         if ((this.customer.methodOfPayment == "" || this.customer.paymentMode == "" || this.customer.policyNo == ""
             || this.customer.policyOwner == "" || this.customer.premium == "" || this.customer.proposedInsured == "")
@@ -43,19 +50,25 @@ export class AddCustomerPage {
                 subTitle: 'All fields are required.',
                 buttons: ['OK']
             });
+            // LoaderUtil.dismissLoader();
             alert.present();
 
             return;
         }
 
-        var selectedDueDate = new Date(this.dueDate);
+        var selectedDueDate;
 
-        this.customer.dueDate = (selectedDueDate.getMonth() + 1) + "/" + selectedDueDate.getDate() + "/" + selectedDueDate.getFullYear();
+        if (Object.prototype.toString.call(this.dueDate).includes("String")) {
+            selectedDueDate = new Date(this.dueDate);
+            this.customer.dueDate = (selectedDueDate.getMonth() + 1) + "/" + (this.isEditing ? selectedDueDate.getDate() - 1 : selectedDueDate.getDate())
+                + "/" + selectedDueDate.getFullYear();
+        } else {
+            selectedDueDate = this.dueDate;
+            this.customer.dueDate = selectedDueDate.month + '/' + selectedDueDate.day + '/' + selectedDueDate.year;
+        }
+
 
         var selectedCcExpireDate = new Date(this.ccExpireDate);
-
-        console.log(this.ccExpireDate);
-        console.log(selectedCcExpireDate);
 
         this.customer.ccExpire = (selectedCcExpireDate.getMonth() + 1) + "/" + selectedCcExpireDate.getFullYear();
 
@@ -63,6 +76,8 @@ export class AddCustomerPage {
             this.customer.cardRenewed = false;
             this.customer.paid = false;
         }
+
+        // LoaderUtil.dismissLoader();
 
         this.events.publish('customerSaved', {
             customer: this.customer,
