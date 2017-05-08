@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { AlertController, Events } from 'ionic-angular';
-import { Storage } from '@ionic/storage';
+
+import { CustomerService } from '../../services/customer.service';
 
 import { Customer } from '../../models/customer';
 
@@ -15,7 +16,7 @@ export class DashboardPage {
   public customersDueDayThree: Customer[] = [];
   public customersDueDaySeven: Customer[] = [];
 
-  constructor(public navCtrl: NavController, public alertCtrl: AlertController, public events: Events, public storage: Storage) {
+  constructor(public navCtrl: NavController, public alertCtrl: AlertController, public events: Events, public customerService: CustomerService) {
 
     this.events.subscribe('customerListUpdated', () => {
       this.updateLists();
@@ -31,48 +32,56 @@ export class DashboardPage {
   }
 
   updateLists() {
-    this.customersDueDayOne = [];
-    this.customersDueDayThree = [];
-    this.customersDueDaySeven = [];
+    // this.customersDueDayOne = [];
+    // this.customersDueDayThree = [];
+    // this.customersDueDaySeven = [];
 
-    this.storage.get('customers').then((val) => {
+    // this.storage.get('customers').then((val) => {
 
-      this.customersDueDayOne = [];
-      this.customersDueDayThree = [];
-      this.customersDueDaySeven = [];
+    //   this.customersDueDayOne = [];
+    //   this.customersDueDayThree = [];
+    //   this.customersDueDaySeven = [];
 
-      if (val) {
+    //   if (val) {
 
-        val.forEach(customer => {
+    //     val.forEach(customer => {
 
-          if (!customer.paid) {
+    //       if (!customer.paid) {
 
-            // Populate each customers' list w.r.t. respective payment due dates
-            var oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds 
-            var dummyDate = new Date(customer.dueDate);
-            // dummyDate.setMonth(dummyDate.getMonth() - 1);
+    //         // Populate each customers' list w.r.t. respective payment due dates
+    //         var oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds 
+    //         var dummyDate = new Date(customer.dueDate);
+    //         // dummyDate.setMonth(dummyDate.getMonth() - 1);
 
-            var diffDays = Math.round(Math.abs((dummyDate.getTime() - new Date().getTime()) / (oneDay)));
+    //         var diffDays = Math.round((dummyDate.getTime() - new Date().getTime()) / (oneDay));
 
-            if (diffDays == 1) {
-              this.customersDueDayOne.push(customer);
-            } else if (diffDays == 3) {
-              this.customersDueDayThree.push(customer);
-            } else if (diffDays == 7) {
-              this.customersDueDaySeven.push(customer);
-            }
+    //         if (diffDays == 1) {
+    //           this.customersDueDayOne.push(customer);
+    //         } else if (diffDays == 3) {
+    //           this.customersDueDayThree.push(customer);
+    //         } else if (diffDays == 7) {
+    //           this.customersDueDaySeven.push(customer);
+    //         }
 
-          }
+    //       }
 
-        });
-      }
+    //     });
+    //   }
 
-      this.storage.set("dashboardEventCount", this.customersDueDayOne.length + this.customersDueDayThree.length + this.customersDueDaySeven.length).then(() => {
+    //   this.storage.set("dashboardEventCount", this.customersDueDayOne.length + this.customersDueDayThree.length + this.customersDueDaySeven.length).then(() => {
 
-        this.events.publish("updateTabs");
-      });
+    //     this.events.publish("updateTabs");
+    //   });
 
+    // });
+
+    this.customerService.getDueDateLists().then((val: {}) => {
+      this.customersDueDayOne = <Array<Customer>> (val['day1']);
+      this.customersDueDayThree = <Array<Customer>> (val['day3']);
+      this.customersDueDaySeven = <Array<Customer>> (val['day7']);
     });
+
+    this.events.publish("updateTabs");
   }
 
   showConfirm(selectedCustomer: Customer) {

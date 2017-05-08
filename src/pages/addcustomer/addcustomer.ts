@@ -23,10 +23,10 @@ export class AddCustomerPage {
         this.isEditing = this.params.get("isEditing");
         this.customer = this.params.get("customer");
         if (this.isEditing) {
-            
+
             const [dueDateMonth, dueDateDay, dueDateYear] = this.customer.dueDate.split('/');
             this.dueDate = new Date(Number(dueDateYear), Number(dueDateMonth) - 1, Number(dueDateDay) + 1).toISOString();
-            
+
             if (this.customer.methodOfPayment == "Debit/ Credit Card") {
 
                 const [month, year] = this.customer.ccExpire.split('/');
@@ -63,14 +63,21 @@ export class AddCustomerPage {
             this.customer.dueDate = (selectedDueDate.getMonth() + 1) + "/" + (this.isEditing ? selectedDueDate.getDate() - 1 : selectedDueDate.getDate())
                 + "/" + selectedDueDate.getFullYear();
         } else {
+            // It is Object json
             selectedDueDate = this.dueDate;
             this.customer.dueDate = selectedDueDate.month + '/' + selectedDueDate.day + '/' + selectedDueDate.year;
         }
 
+        var selectedCcExpireDate;
 
-        var selectedCcExpireDate = new Date(this.ccExpireDate);
-
-        this.customer.ccExpire = (selectedCcExpireDate.getMonth() + 1) + "/" + selectedCcExpireDate.getFullYear();
+        if (Object.prototype.toString.call(this.ccExpireDate).includes("String")) {
+            selectedCcExpireDate = new Date(this.ccExpireDate);
+            this.customer.ccExpire = (selectedCcExpireDate.getMonth() + 1) + "/" + selectedCcExpireDate.getFullYear();
+        } else {
+            // It is Object json
+            selectedCcExpireDate = this.ccExpireDate;
+            this.customer.ccExpire = selectedCcExpireDate.month + '/' + selectedCcExpireDate.year;
+        }
 
         if (this.isEditing) {
             this.customer.cardRenewed = false;

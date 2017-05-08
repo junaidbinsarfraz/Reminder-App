@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Events } from 'ionic-angular';
-import { Storage } from '@ionic/storage';
+
+import { CustomerService } from '../../services/customer.service';
 
 import { CcExpirePage } from '../ccexpire/ccexpire';
 import { CustomersPage } from '../customers/customers';
@@ -17,41 +18,54 @@ export class TabsPage {
   tab3Root = CustomersPage;
   tab4Root = SettingPage;
 
-  public dashboardEventCount: number = 0;
-  public ccExpireEventCount: number = 0;
+  public dashboardEventCount: number = null;
+  public ccExpireEventCount: number = null;
 
-  constructor(public events: Events, public storage: Storage) {
+  constructor(public events: Events, public customerService: CustomerService) {
+
+    this.events.subscribe('updateTabs', () => {
+      // this.storage.get("ccExpireEventCount").then((val) => {
+      //   this.ccExpireEventCount = val;
+
+      //   this.storage.get("dashboardEventCount").then((val) => {
+      //     this.dashboardEventCount = val;
+
+      //     if (this.dashboardEventCount == 0) {
+      //       this.dashboardEventCount = null;
+      //     }
+
+      //     if (this.ccExpireEventCount == 0) {
+      //       this.ccExpireEventCount = null;
+      //     }
+      //   });
+      // });
+
+      this.updateTabCounts();
+
+    });
 
   }
 
   ionViewWillEnter() {
+    this.updateTabCounts();
+  }
 
-    if (this.dashboardEventCount == 0) {
-      this.dashboardEventCount = null;
-    }
+  updateTabCounts() {
+    this.customerService.getTabCounts().then((val) => {
 
-    if (this.ccExpireEventCount == 0) {
-      this.ccExpireEventCount = null;
-    }
+      this.ccExpireEventCount = <number>val['ccExpiryCount'];
+      this.dashboardEventCount = <number>val['dashboardCount'];
 
-    this.events.subscribe('updateTabs', () => {
-      this.storage.get("ccExpireEventCount").then((val) => {
-        this.ccExpireEventCount = val;
+      if (!this.dashboardEventCount || this.dashboardEventCount == 0) {
+        this.dashboardEventCount = null;
+      }
 
-        this.storage.get("dashboardEventCount").then((val) => {
-          this.dashboardEventCount = val;
+      if (!this.ccExpireEventCount || this.ccExpireEventCount == 0) {
+        this.ccExpireEventCount = null;
+      }
 
-          if (this.dashboardEventCount == 0) {
-            this.dashboardEventCount = null;
-          }
-
-          if (this.ccExpireEventCount == 0) {
-            this.ccExpireEventCount = null;
-          }
-        });
-      });
-
+    }).catch((error) => {
+      console.log("Error" + error);
     });
-
   }
 }

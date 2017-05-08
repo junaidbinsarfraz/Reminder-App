@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { ActionSheetController, Events } from 'ionic-angular';
-import { Storage } from '@ionic/storage';
+
+import { CustomerService } from '../../services/customer.service';
 
 import { AddCustomerPage } from '../addcustomer/addcustomer';
 
@@ -16,10 +17,11 @@ export class CustomersPage {
   public customers: Customer[] = [];
   public searchQuery: string = '';
 
-  constructor(public navCtrl: NavController, public actionSheetCtrl: ActionSheetController, public events: Events, public storage: Storage) {
-    
+  constructor(public navCtrl: NavController, public actionSheetCtrl: ActionSheetController, public events: Events, private customerService: CustomerService) {
+
     this.events.subscribe('customerSaved', (data) => {
       // Extract customer
+
       if (!data.isEditing) {
         this.customers.push(data.customer);
       } else {
@@ -30,18 +32,21 @@ export class CustomersPage {
         }
       }
 
-      this.storage.set('customers', this.customers).then(() => {
+      customerService.saveCustomers(this.customers).then((val) => {
+         this.customers = <Array<Customer>>val;
         this.events.publish('customerListUpdated');
+        this.events.publish("updateTabs");
       });
+
     });
 
   }
 
   ionViewWillEnter() {
 
-    this.storage.get('customers').then((val) => {
+    this.customerService.getCustomers().then((val) => {
       if (val) {
-        this.customers = val;
+        this.customers = <Array<Customer>>val;
       }
     });
 
@@ -49,27 +54,26 @@ export class CustomersPage {
 
   onCancel(event) {
     // Reset items back to all of the items
-    this.storage.get('customers').then((val) => {
+    this.customerService.getCustomers().then((val) => {
       if (val) {
-        this.customers = val;
-        const copy = { ...this.customers };
+        this.customers = <Array<Customer>>val;
       }
     });
   }
 
   onInput(searchbar) {
     // Reset items back to all of the items
-    this.storage.get('customers').then((val) => {
+    this.customerService.getCustomers().then((val) => {
       if (val) {
-        this.customers = val;
+        this.customers = <Array<Customer>>val;
 
         // set q to the value of the searchbar
         // var q = searchbar.target.value;
         // if the value is an empty string don't filter the items
         if (!this.searchQuery || this.searchQuery.trim() == '') {
-          this.storage.get('customers').then((val) => {
+          this.customerService.getCustomers().then((val) => {
             if (val) {
-              this.customers = val;
+              this.customers = <Array<Customer>>val;
             }
           });
           return;
@@ -108,11 +112,32 @@ export class CustomersPage {
           role: 'destructive',
           handler: () => {
             this.searchQuery = '';
+
+            // this.customerService.deleteCustomer(selectedCustomer).then((val) => {
+            //   this.customers = <Array<Customer>>val;
+            //   this.events.publish('customerListUpdated');
+            //   this.events.publish("updateTabs");
+            //   // TODO: Show message
+            // }).catch((error) => {
+            //   console.log(error);
+            //   // TODO: Show message
+            // });
+
             let index: number = this.customers.indexOf(selectedCustomer);
             if (index !== -1) {
               this.customers.splice(index, 1);
-              this.storage.set('customers', this.customers);
-              this.events.publish('customerListUpdated');
+              this.customerService.saveCustomers(this.customers).then((val) => {
+                this.customers = <Array<Customer>>val;
+                this.events.publish('customerListUpdated');
+                this.events.publish("updateTabs");
+                // TODO: Show message
+              }).catch((error) => {
+                this.customerService.getCustomers().then((val) => {
+                  this.customers = <Array<Customer>>val;
+                });
+                console.log(error);
+                // TODO: Show message
+              });
             }
           }
         }, {
