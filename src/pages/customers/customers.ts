@@ -8,6 +8,8 @@ import { AddCustomerPage } from '../addcustomer/addcustomer';
 
 import { Customer } from '../../models/customer';
 
+import ToastUtil from '../../utils/toast.util';
+
 @Component({
   selector: 'page-contact',
   templateUrl: 'customers.html'
@@ -21,22 +23,31 @@ export class CustomersPage {
 
     this.events.subscribe('customerSaved', (data) => {
       // Extract customer
-
-      if (!data.isEditing) {
-        this.customers.push(data.customer);
-      } else {
-        let index: number = this.customers.indexOf(data.customer);
-        // console.log(index);
-        if (index !== -1) {
-          this.customers[index] = data.customer;
+      try {
+        if (!data.isEditing) {
+          this.customers.push(data.customer);
+        } else {
+          let index: number = this.customers.indexOf(data.customer);
+          // console.log(index);
+          if (index !== -1) {
+            this.customers[index] = data.customer;
+          }
         }
-      }
 
-      customerService.saveCustomers(this.customers).then((val) => {
-         this.customers = <Array<Customer>>val;
-        this.events.publish('customerListUpdated');
-        this.events.publish("updateTabs");
-      });
+        customerService.saveCustomers(this.customers).then((val) => {
+          this.customers = <Array<Customer>>val;
+          this.events.publish('customerListUpdated');
+          this.events.publish("updateTabs");
+          ToastUtil.showToast("Successfully saved");
+        }).catch((error) => {
+          this.customerService.getCustomers().then((val) => {
+            this.customers = <Array<Customer>>val;
+          });
+          ToastUtil.showToast("Unable to save");
+        });
+      } catch (e) {
+        ToastUtil.showToast("Unable to save");
+      }
 
     });
 
@@ -130,14 +141,16 @@ export class CustomersPage {
                 this.customers = <Array<Customer>>val;
                 this.events.publish('customerListUpdated');
                 this.events.publish("updateTabs");
-                // TODO: Show message
+                ToastUtil.showToast("Successfully deleted");
               }).catch((error) => {
                 this.customerService.getCustomers().then((val) => {
                   this.customers = <Array<Customer>>val;
                 });
                 console.log(error);
-                // TODO: Show message
+                ToastUtil.showToast("Unable to delete");
               });
+            } else {
+              ToastUtil.showToast("Unable to delete");
             }
           }
         }, {
