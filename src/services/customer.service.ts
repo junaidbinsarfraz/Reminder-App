@@ -1,6 +1,7 @@
 /* Notice that the imports have slightly changed*/
 import { Injectable } from "@angular/core";
 
+import { User } from '@ionic/cloud-angular';
 import { Storage } from '@ionic/storage';
 
 import { Customer } from '../models/customer';
@@ -19,60 +20,79 @@ export class CustomerService {
 
   private dashboardCount: number = 0;
   private ccExpiryCount: number = 0;
+  private isSubscribed: boolean = false;
 
-  constructor(private storage: Storage) {
+  constructor(private storage: Storage, public user: User) {
     // this.http = http;
     // this.data = null;
+    this.isSubscribed = this.user.data.get('isSubscribed');
   }
 
   getCustomers() {
     return new Promise((resolve, reject) => {
+
       if (this.customers.length > 0) {
         resolve(this.customers);
+        return;
       }
-      this.storage.get('customers').then((val) => {
-        if (val) {
-          this.customers = val;
-          // this.updateDueDateAndExpiryLists();
-          resolve(val);
-        }
-      }).catch((error) => {
-        console.log("ERROR" + error)
-        reject(error);
-      });
+
+      if (this.isSubscribed) {
+        this.customers = this.user.data.get('customers');
+      } else {
+        this.storage.get('customers').then((val) => {
+          if (val) {
+            this.customers = val;
+            // this.updateDueDateAndExpiryLists();
+            resolve(val);
+          }
+        }).catch((error) => {
+          console.log("ERROR" + error)
+          reject(error);
+        });
+      }
     });
   }
 
   saveCustomers(updatedCustomers: Customer[]) {
     return new Promise((resolve, reject) => {
 
-      this.storage.set('customers', updatedCustomers).then(() => {
-        this.customers = updatedCustomers;
-        this.updateDueDateAndExpiryLists();
-        resolve(this.customers);
-      }).catch((error) => {
-        reject(error);
-      });
-
-    });
-  }
-
-  deleteCustomer(customer: Customer) {
-    return new Promise((resolve, reject) => {
-      let index: number = this.customers.indexOf(customer);
-      if (index !== -1) {
-        this.customers.splice(index, 1);
-        this.storage.set('customers', this.customers).then(() => {
+      if (this.isSubscribed) {
+        this.user.set("customers", updatedCustomers);
+        this.user.save().then(() => {
+          this.customers = updatedCustomers;
           this.updateDueDateAndExpiryLists();
           resolve(this.customers);
         }).catch((error) => {
           reject(error);
         });
       } else {
-        reject('Unable to find customer in the list');
+        this.storage.set('customers', updatedCustomers).then(() => {
+          this.customers = updatedCustomers;
+          this.updateDueDateAndExpiryLists();
+          resolve(this.customers);
+        }).catch((error) => {
+          reject(error);
+        });
       }
     });
   }
+
+  // deleteCustomer(customer: Customer) {
+  //   return new Promise((resolve, reject) => {
+  //     let index: number = this.customers.indexOf(customer);
+  //     if (index !== -1) {
+  //       this.customers.splice(index, 1);
+  //       this.storage.set('customers', this.customers).then(() => {
+  //         this.updateDueDateAndExpiryLists();
+  //         resolve(this.customers);
+  //       }).catch((error) => {
+  //         reject(error);
+  //       });
+  //     } else {
+  //       reject('Unable to find customer in the list');
+  //     }
+  //   });
+  // }
 
   updateDueDateAndExpiryLists() {
 
@@ -225,5 +245,31 @@ export class CustomerService {
 
     });
 
+  }
+
+  getUserSubscriptionStatus() {
+    return this.isSubscribed;
+  }
+
+  paymentSuccessfull() {
+
+    return new Promise((resolve, reject) => {
+
+      this.user.set('paymentCompleted', true);
+      this.user.set('isSubscribed', true);
+      this.user.save().then(() => {
+        this.isSubscribed = true;
+        resolve({ status: 200, statusMessage: "Successfully saved" });
+      }).catch((error) => {
+        console.log('');
+        // TODO: Generate an email about it to admin
+        this.storage.set('paymentCompleted', true).then(() => {
+          reject({ status: 401, statusMessage: "Payment stored in local storage", errorMessage: error });
+        }).catch((localError) => {
+          // TODO: Generate an email about it to admin
+          reject({ status: 404, statusMessage: "Payment not stored in local storage", errorMessage: error, localErrorMessage: localError });
+        });
+      });
+    });
   }
 }

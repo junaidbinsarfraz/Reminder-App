@@ -5,5 +5,39 @@
 </ion-header>
 
 <ion-content padding>
-  Setting
+
+  <ion-item-group>
+    <ion-item-divider color="light">
+      <h2>Upgrade</h2>
+    </ion-item-divider>
+    <ion-item *ngIf="isSubscribed">
+      <label ion-label>
+      - Upgraded to cloud storage.<br/>&nbsp;&nbsp;You can enjoy 5 GB of space.
+      </label>
+    </ion-item>
+    <ion-item *ngIf="!isSubscribed">
+      <button ion-button padding icon-left (click)="upgrade()">
+        <ion-icon name="cloud-upload"></ion-icon>
+        Upgrade Now
+      </button>
+      <br/>
+      <label ion-label padding>
+        - Upgrade to cloud storage to 5 GB
+      </label>
+    </ion-item>
+  </ion-item-group>
+
+  <ion-item-group>
+    <ion-item-divider color="light">
+      <h2>Feedback</h2>
+    </ion-item-divider>
+    <ion-item>
+      <ion-textarea placeholder="Enter feedback" [(ngModel)]="feedback"></ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <button ion-button full (click)="sendFeedback()">Send</button>
+    </ion-item>
+  
+  </ion-item-group>
 </ion-content>

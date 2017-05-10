@@ -52,6 +52,15 @@ export class LoginPage {
       this.auth.login('basic', { 'email': this.email, 'password': this.password }).then(() => {
         // console.log('ok i guess?');
         loader.dismissAll();
+        // this.user.set('chilling', {name: "My Name", customer: {paid: false}});
+        // this.user.save().then(() => {
+        //   this.user.load().then((val) => {
+        //     var dummy = this.user.data.get('chilling');
+        //     console.log(dummy);
+        //     console.log(this.user);
+        //     console.log(val);
+        //   });
+        // })
         this.navCtrl.setRoot(TabsPage);
       }, (err) => {
         loader.dismissAll();

@@ -9,6 +9,7 @@ import { AddCustomerPage } from '../addcustomer/addcustomer';
 import { Customer } from '../../models/customer';
 
 import ToastUtil from '../../utils/toast.util';
+import LoaderUtil from '../../utils/loader.util';
 
 @Component({
   selector: 'page-contact',
@@ -18,12 +19,18 @@ export class CustomersPage {
 
   public customers: Customer[] = [];
   public searchQuery: string = '';
+  private isSubscribed: boolean = false;
 
   constructor(public navCtrl: NavController, public actionSheetCtrl: ActionSheetController, public events: Events, private customerService: CustomerService) {
 
     this.events.subscribe('customerSaved', (data) => {
       // Extract customer
       try {
+
+        if(this.isSubscribed) {
+          LoaderUtil.showLoader("Please wait ...");
+        }
+
         if (!data.isEditing) {
           this.customers.push(data.customer);
         } else {
@@ -38,18 +45,35 @@ export class CustomersPage {
           this.customers = <Array<Customer>>val;
           this.events.publish('customerListUpdated');
           this.events.publish("updateTabs");
+
+          if(this.isSubscribed) {
+            LoaderUtil.dismissLoader();
+          }
+          
           ToastUtil.showToast("Successfully saved");
         }).catch((error) => {
           this.customerService.getCustomers().then((val) => {
             this.customers = <Array<Customer>>val;
           });
+
+          if(this.isSubscribed) {
+            LoaderUtil.dismissLoader();
+          }
+
           ToastUtil.showToast("Unable to save");
         });
       } catch (e) {
+
+        if(this.isSubscribed) {
+          LoaderUtil.dismissLoader();
+        }
+
         ToastUtil.showToast("Unable to save");
       }
 
     });
+
+    this.isSubscribed = this.customerService.getUserSubscriptionStatus();
 
   }
 
@@ -60,6 +84,8 @@ export class CustomersPage {
         this.customers = <Array<Customer>>val;
       }
     });
+
+    this.isSubscribed = this.customerService.getUserSubscriptionStatus();
 
   }
 
@@ -123,6 +149,10 @@ export class CustomersPage {
           role: 'destructive',
           handler: () => {
             this.searchQuery = '';
+            
+            if(this.isSubscribed) {
+              LoaderUtil.showLoader("Please wait ...");
+            }
 
             // this.customerService.deleteCustomer(selectedCustomer).then((val) => {
             //   this.customers = <Array<Customer>>val;
@@ -141,15 +171,26 @@ export class CustomersPage {
                 this.customers = <Array<Customer>>val;
                 this.events.publish('customerListUpdated');
                 this.events.publish("updateTabs");
+                
+                if(this.isSubscribed) {
+                  LoaderUtil.dismissLoader();
+                }
                 ToastUtil.showToast("Successfully deleted");
               }).catch((error) => {
                 this.customerService.getCustomers().then((val) => {
                   this.customers = <Array<Customer>>val;
                 });
                 console.log(error);
+                if(this.isSubscribed) {
+                  LoaderUtil.dismissLoader();
+                }
                 ToastUtil.showToast("Unable to delete");
               });
             } else {
+
+              if(this.isSubscribed) {
+                LoaderUtil.dismissLoader();
+              }
               ToastUtil.showToast("Unable to delete");
             }
           }

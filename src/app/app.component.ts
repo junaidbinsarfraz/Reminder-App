@@ -32,10 +32,6 @@ export class MyApp {
       LoaderUtil.init(this.loadingCtrl);
       ToastUtil.init(this.toastCtrl);
 
-      // TODO: Initialize tab values onload
-
-      this.rootPage = CcExpirePage;
-
       if (this.auth.isAuthenticated()) {
         this.rootPage = TabsPage;
       } else {

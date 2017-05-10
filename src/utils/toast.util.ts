@@ -35,10 +35,10 @@ export default class ToasterUtil {
         ToasterUtil.toast.present();
     }
 
-    static showToast(message) {
+    static showToast(message, duration?) {
         ToasterUtil.toast = this.toastCtrl.create({
             message: message,
-            duration: 2000,
+            duration: duration ? duration : 2000,
             position: 'top'
         });
         ToasterUtil.toast.present();
