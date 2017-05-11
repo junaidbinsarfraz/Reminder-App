@@ -3,6 +3,8 @@ import { NavController, AlertController, LoadingController } from 'ionic-angular
 import { Auth, User, UserDetails, IDetailedError } from '@ionic/cloud-angular';
 import { TabsPage } from '../tabs/tabs';
 
+import { CustomerService } from '../../services/customer.service';
+
 @Component({
   selector: 'page-login',
   templateUrl: 'login.html'
@@ -18,7 +20,7 @@ export class LoginPage {
   contactNumber: string = '';
   username: string = '';
 
-  constructor(public navCtrl: NavController, public auth: Auth, public user: User, public alertCtrl: AlertController, public loadingCtrl: LoadingController) {
+  constructor(public navCtrl: NavController, public auth: Auth, public user: User, public alertCtrl: AlertController, public loadingCtrl: LoadingController, private customerService: CustomerService) {
   }
 
   ionViewDidLoad() {
@@ -61,6 +63,7 @@ export class LoginPage {
         //     console.log(val);
         //   });
         // })
+        this.customerService.updateSubscriptionStatus();
         this.navCtrl.setRoot(TabsPage);
       }, (err) => {
         loader.dismissAll();

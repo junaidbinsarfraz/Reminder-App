@@ -53,10 +53,10 @@ export class CustomerService {
     });
   }
 
-  saveCustomers(updatedCustomers: Customer[]) {
+  saveCustomers(updatedCustomers: Customer[], isSubscribed?: boolean) {
     return new Promise((resolve, reject) => {
 
-      if (this.isSubscribed) {
+      if (isSubscribed || this.isSubscribed) {
         this.user.set("customers", updatedCustomers);
         this.user.save().then(() => {
           this.customers = updatedCustomers;
@@ -251,25 +251,86 @@ export class CustomerService {
     return this.isSubscribed;
   }
 
-  paymentSuccessfull() {
+  updateSubscriptionStatus() {
+    this.isSubscribed = this.user.data.get('isSubscribed');
+  }
 
+  paymentSuccessfull(PaypalInfo?: any) {
+    // Do paypal here and move this method to payment service
     return new Promise((resolve, reject) => {
 
-      this.user.set('paymentCompleted', true);
-      this.user.set('isSubscribed', true);
-      this.user.save().then(() => {
-        this.isSubscribed = true;
-        resolve({ status: 200, statusMessage: "Successfully saved" });
-      }).catch((error) => {
-        console.log('');
-        // TODO: Generate an email about it to admin
-        this.storage.set('paymentCompleted', true).then(() => {
-          reject({ status: 401, statusMessage: "Payment stored in local storage", errorMessage: error });
-        }).catch((localError) => {
-          // TODO: Generate an email about it to admin
-          reject({ status: 404, statusMessage: "Payment not stored in local storage", errorMessage: error, localErrorMessage: localError });
+      resolve();
+
+      // this.user.set('paymentCompleted', true);
+      // this.user.set('isSubscribed', true);
+      // this.user.save().then(() => {
+      //   this.isSubscribed = true;
+      //   resolve({ status: 200, statusMessage: "Successfully saved" });
+      // }).catch((error) => {
+      //   console.log('');
+      //   // TODO: Generate an email about it to admin
+      //   this.storage.set('paymentCompleted', true).then(() => {
+      //     reject({ status: 401, statusMessage: "Payment stored in local storage", errorMessage: error });
+      //   }).catch((localError) => {
+      //     // TODO: Generate an email about it to admin
+      //     reject({ status: 404, statusMessage: "Payment not stored in local storage", errorMessage: error, localErrorMessage: localError });
+      //   });
+      // });
+    });
+  }
+
+  addKeyValueToStorage(key: string, value: any, storageKind?: string) {
+    return new Promise((resolve, reject) => {
+
+      if ((storageKind && storageKind == 'cloud') || (!storageKind && this.isSubscribed)) {
+        this.user.set(key, value);
+        this.user.save().then(() => {
+          resolve();
+        }).catch((error) => {
+          reject(error);
         });
-      });
+      } else {
+        this.storage.set(key, value).then(() => {
+          resolve();
+        }).catch((error) => {
+          reject(error);
+        });
+      }
+    });
+  }
+
+  removeKeyValueFromStorage(key: string, storageKind?: string) {
+    return new Promise((resolve, reject) => {
+
+      if ((storageKind && storageKind == 'cloud') || (!storageKind && this.isSubscribed)) {
+        this.user.unset(key);
+        this.user.save().then(() => {
+          resolve();
+        }).catch((error) => {
+          reject(error);
+        });
+      } else {
+        this.storage.remove(key).then(() => {
+          resolve();
+        }).catch((error) => {
+          reject(error);
+        });
+      }
+    });
+  }
+
+  getValueOfKeyFromStorage(key: string, storageKind?: string) {
+    return new Promise((resolve, reject) => {
+
+      if ((storageKind && storageKind == 'cloud') || (!storageKind && this.isSubscribed)) {
+        resolve(this.user.get(key, null));
+      } else {
+        this.storage.get(key).then((value) => {
+          resolve(value);
+        }).catch((error) => {
+          reject(error);
+        });
+      }
     });
   }
 }
