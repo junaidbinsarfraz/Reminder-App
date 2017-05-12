@@ -6,6 +6,9 @@ import { CustomerService } from '../../services/customer.service';
 
 import { Customer } from '../../models/customer';
 
+import ToastUtil from '../../utils/toast.util';
+import LoaderUtil from '../../utils/loader.util';
+
 @Component({
   selector: 'page-home',
   templateUrl: 'dashboard.html'
@@ -15,6 +18,7 @@ export class DashboardPage {
   public customersDueDayOne: Customer[] = [];
   public customersDueDayThree: Customer[] = [];
   public customersDueDaySeven: Customer[] = [];
+  private isSubscribed: boolean = false;
 
   constructor(public navCtrl: NavController, public alertCtrl: AlertController, public events: Events, public customerService: CustomerService) {
 
@@ -23,9 +27,13 @@ export class DashboardPage {
       console.log("CcExpirePage");
     });
 
+    this.isSubscribed = this.customerService.getUserSubscriptionStatus();
+
   }
 
   ionViewWillEnter() {
+
+    this.isSubscribed = this.customerService.getUserSubscriptionStatus();
 
     this.updateLists();
 
@@ -75,13 +83,23 @@ export class DashboardPage {
 
     // });
 
-    this.customerService.getDueDateLists().then((val: {}) => {
-      this.customersDueDayOne = <Array<Customer>> (val['day1']);
-      this.customersDueDayThree = <Array<Customer>> (val['day3']);
-      this.customersDueDaySeven = <Array<Customer>> (val['day7']);
-    });
+    return new Promise((resolve, reject) => {
 
-    this.events.publish("updateTabs");
+      this.customerService.getDueDateLists().then((val: {}) => {
+        this.customersDueDayOne = <Array<Customer>>(val['day1']);
+        this.customersDueDayThree = <Array<Customer>>(val['day3']);
+        this.customersDueDaySeven = <Array<Customer>>(val['day7']);
+
+        this.events.publish("updateTabs");
+
+        resolve();
+      }).catch((error) => {
+        this.events.publish("updateTabs");
+
+        reject(error);
+      });
+
+    });
   }
 
   showConfirm(selectedCustomer: Customer) {
@@ -99,6 +117,82 @@ export class DashboardPage {
           text: 'Paid',
           handler: () => {
             console.log('Agree clicked');
+
+            if (this.isSubscribed) {
+              LoaderUtil.showLoader("Please wait ...");
+            }
+
+            this.customerService.getCustomers().then((val) => {
+              var customers = <Array<Customer>>val;
+
+              try {
+
+                let index: number = customers.indexOf(selectedCustomer);
+                if (index !== -1) {
+                  // Set values
+                  var date = new Date(selectedCustomer.dueDate);
+                  if (selectedCustomer.paymentMode == 'Monthly') {
+                    date.setMonth(date.getMonth() + 1);
+                  } else if (selectedCustomer.paymentMode == 'Quarterly') {
+                    date.setMonth(date.getMonth() + 3);
+                  } else if (selectedCustomer.paymentMode == 'Semi-Annually') {
+                    date.setMonth(date.getMonth() + 6);
+                  } else if (selectedCustomer.paymentMode == 'Annually') {
+                    date.setMonth(date.getMonth() + 12);
+                  }
+
+                  selectedCustomer.dueDate = (date.getMonth() + 1) + "/" + date.getDate() + "/" + date.getFullYear();
+
+                  customers[index] = selectedCustomer;
+
+                  this.customerService.saveCustomers(customers).then(() => {
+                    this.updateLists().then(() => {
+                      if (this.isSubscribed) {
+                        LoaderUtil.dismissLoader();
+                      }
+
+                      ToastUtil.showToast("Successfully saved");
+
+                    }).catch((error) => {
+                      // TODO: show error, Saved successfully, not able to load list
+                      if (this.isSubscribed) {
+                        LoaderUtil.dismissLoader();
+                      }
+
+                      ToastUtil.showToast("Unable to process request");
+
+                    });
+                  }).catch((error) => {
+                    if (this.isSubscribed) {
+                      LoaderUtil.dismissLoader();
+                    }
+
+                    ToastUtil.showToast("Unable to process request");
+
+                    return false;
+                  });
+                }
+
+              } catch (exception) {
+                if (this.isSubscribed) {
+                  LoaderUtil.dismissLoader();
+                }
+
+                ToastUtil.showToast("Unable to process request");
+
+                return false;
+              }
+
+            }).catch((error) => {
+              if (this.isSubscribed) {
+                LoaderUtil.dismissLoader();
+              }
+
+              ToastUtil.showToast("Unable to process request");
+
+              return false;
+            });
+
           }
         }
       ]

@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
 
+import { DateModal } from '../pages/ccexpire/modals/datemodal';
 import { CcExpirePage } from '../pages/ccexpire/ccexpire';
 import { CustomersPage } from '../pages/customers/customers';
 import { DashboardPage } from '../pages/dashboard/dashboard';
@@ -33,7 +34,8 @@ const cloudSettings: CloudSettings = {
     SettingPage,
     TabsPage,
     LoginPage,
-    AddCustomerPage
+    AddCustomerPage,
+    DateModal
   ],
   imports: [
     BrowserModule,
@@ -50,7 +52,8 @@ const cloudSettings: CloudSettings = {
     SettingPage,
     TabsPage,
     LoginPage,
-    AddCustomerPage
+    AddCustomerPage,
+    DateModal
   ],
   providers: [
     StatusBar,

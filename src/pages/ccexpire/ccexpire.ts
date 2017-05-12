@@ -1,22 +1,23 @@
-import { Component, Injectable } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { Component } from '@angular/core';
+import { ModalController, NavController } from 'ionic-angular';
 import { AlertController, Events } from 'ionic-angular';
 
 import { CustomerService } from '../../services/customer.service';
 
 import { Customer } from '../../models/customer';
 
+import { DateModal } from '../ccexpire/modals/datemodal'
+
 @Component({
   selector: 'page-about',
   templateUrl: 'ccexpire.html'
 })
 
-// @Injectable()
 export class CcExpirePage {
 
   public customersCcExpired: Customer[] = [];
 
-  constructor(public navCtrl: NavController, public alertCtrl: AlertController, public events: Events, public customerService: CustomerService) {
+  constructor(public navCtrl: NavController, public alertCtrl: AlertController, public events: Events, public customerService: CustomerService, public modalCtrl: ModalController) {
 
     this.events.subscribe('customerListUpdated', () => {
       this.updateLists();
@@ -67,7 +68,7 @@ export class CcExpirePage {
     // });
 
     this.customerService.getCcExpiryList().then((val) => {
-      this.customersCcExpired = <Array<Customer>> val;
+      this.customersCcExpired = <Array<Customer>>val;
     });
 
     this.events.publish("updateTabs");
@@ -77,17 +78,27 @@ export class CcExpirePage {
     let confirm = this.alertCtrl.create({
       title: 'Renew',
       message: 'Has customer renewed the credit card?',
+      inputs: [
+        {
+          name: 'date',
+          placeholder: 'CC Expire Date',
+          type: 'ion-datetime'
+        }
+      ],
       buttons: [
         {
           text: 'No',
-          handler: () => {
+          handler: (data) => {
             console.log('Disagree clicked');
           }
         },
         {
           text: 'Renewed',
-          handler: () => {
+          handler: (data) => {
             console.log('Agree clicked');
+            console.log(data);
+            let contactModal = this.modalCtrl.create(DateModal);
+             contactModal.present();
           }
         }
       ]
