@@ -21,6 +21,7 @@
     "@angular/platform-browser-dynamic": "4.0.2",
     "@ionic-native/background-mode": "^3.6.1",
     "@ionic-native/core": "^3.4.2",
+    "@ionic-native/paypal": "^3.11.0",
     "@ionic-native/splash-screen": "3.4.2",
     "@ionic-native/status-bar": "3.4.2",
     "@ionic/cloud-angular": "^0.12.0",
@@ -42,7 +43,8 @@
     "cordova-plugin-statusbar",
     "cordova-plugin-device",
     "cordova-plugin-splashscreen",
-    "ionic-plugin-keyboard"
+    "ionic-plugin-keyboard",
+    "com.paypal.cordova.mobilesdk"
   ],
   "cordovaPlatforms": [],
   "description": "simple-login: An Ionic project",
